@@ -2,12 +2,23 @@
 #include<stdio.h>
 #include<winsock2.h>
 #include<string.h>
-#include"cJSON.h"
+#include"mycJSON.h"
 
 char *response = NULL;
 
 void myRegister(char *);
+void myLogin(char *);
 int fileExists(const char *);
+void myLogout(char *);
+void myNewChannel(char *);
+void myJoinChannel(char *);
+void mySendMessage(char *);
+void myRefresh(char *);
+void myChannelMembers(char *);
+void myLeaveChannel(char *);
+int fileExists(const char *);
+void tokenCreator(char *);
+int authentication(char *);
 void success(char *, char *);
 void error(char *);
 
@@ -41,7 +52,7 @@ int main()
     while (1)
     {
         memset(message, 0, sizeof(message));
-        if((s = socket(AF_INET, SOCK_STREAM, 0 )) == INVALID_SOCKET)
+        if((s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
         {
             printf("Could not create socket : %d", WSAGetLastError());
         }
@@ -54,11 +65,11 @@ int main()
         {
             printf("Bind failed with error code : %d", WSAGetLastError());
         }
-        //Listen to incoming connections
+        /// Listen to incoming connections
         listen(s, 3);
-        //Accept and incoming connection
         printf("----------------------------------------------------------------------------------------------\n");
         c = sizeof(struct sockaddr_in);
+        /// Accept and incoming connection
         new_socket = accept(s, (struct sockaddr *)&client, &c);
         if (new_socket == INVALID_SOCKET)
         {
@@ -120,14 +131,14 @@ void myRegister(char *request)
     strncat(address, ".User.json", strlen(".User.json"));
 
 
-    // is user available
+    /// is user available
     if(fileExists(address))
     {
         error("this username is not available.");
         return;
     }
 
-    // json part
+    /// json part
     char *username = calloc(25, 1);
     char *password = calloc(25, 1);
     strncpy(username, request, breaker - request);
@@ -138,13 +149,13 @@ void myRegister(char *request)
     cJSON_AddStringToObject(monitor, "password", password);
     request = cJSON_Print(monitor);
 
-    // database part
+    /// database part
     FILE *file = fopen(address, "w+");
     fprintf(file, "%s", request);
     fclose(file);
     cJSON_Delete(monitor);
 
-    success("Successful", "");
+    success("Successful", "-1");
 }
 
 void myLogin(char *request)
@@ -157,14 +168,14 @@ void myLogin(char *request)
     strncat(address, ".User.json", strlen(".User.json"));
     breaker += 2;
 
-    // is user available
+    /// is user available
     if(!fileExists(address))
     {
         error("Username is not valid.");
         return;
     }
 
-    // database part
+    /// database part
     FILE *file = fopen(address, "r");
     char *tmp = calloc(1025, 1);
     int x = 0;
@@ -173,19 +184,18 @@ void myLogin(char *request)
         tmp[x] = fgetc(file);
         if (feof(file))
             break;
-        //printf("%c", tmp[x]);
         x++;
     }
     fclose(file);
 
-    // processing
+    /// processing
     cJSON *monitor_json = cJSON_Parse(tmp);
     cJSON *username = NULL;
     cJSON *password = NULL;
-    username = cJSON_GetObjectItemCaseSensitive(monitor_json, "username");
-    password = cJSON_GetObjectItemCaseSensitive(monitor_json, "password");
-    int n = strncmp(breaker, password->valuestring, strlen(password->valuestring));
-    if(strncmp(breaker, password->valuestring, strlen(password->valuestring)))
+    username = cJSON_GetObjectItem(monitor_json, "username");
+    password = cJSON_GetObjectItem(monitor_json, "password");
+    breaker[strlen(breaker) - 1] = 0;
+    if(strcmp(breaker, password->valuestring))
     {
         error("Wrong password.");
         return;
@@ -196,7 +206,7 @@ void myLogin(char *request)
         {
             if(users[i].loggedIn == 0)
             {
-                // login
+                /// login
                 users[i].loggedIn = 1;
                 tokenCreator(users[i].token);
                 success("AuthToken", users[i].token);
@@ -204,13 +214,13 @@ void myLogin(char *request)
             }
             else
             {
-                // already logged in
+                /// already logged in
                 error("This user is already logged in.");
                 return;
             }
         }
     }
-    // login and create new User struct
+    /// login and create new User struct
     strncpy(users[loggedInUsersCount].username, username->valuestring, strlen(username->valuestring));
     users[loggedInUsersCount].loggedIn = 1;
     tokenCreator(users[loggedInUsersCount].token);
@@ -224,13 +234,13 @@ void myLogout(char *request)
     char *token = strchr(request, ' ');
     token++;
 
-    // Authentication
+    /// Authentication
     int isAuth = authentication(token);
     if(isAuth != -1)
     {
         users[isAuth].loggedIn = 0;
         memset(users[isAuth].token, 0, strlen(users[isAuth].token));
-        success("Successful", "");
+        success("Successful", "-1");
     }
 }
 
@@ -250,7 +260,7 @@ void myNewChannel(char *request)
     strncat(address, ".Channel.json", strlen(".Channel.json"));
 
 
-    // is user available
+    /// is user available
     if(fileExists(address))
     {
         error("Channel name is not available.");
@@ -271,14 +281,15 @@ void myNewChannel(char *request)
     cJSON_AddItemToArray(messages, message);
 
     request = cJSON_Print(monitor);
-    // database part
+    printf("%s\n", request);
+    /// database part
     FILE *file = fopen(address, "w+");
     fprintf(file, "%s", request);
     fclose(file);
     cJSON_Delete(monitor);
 
     strncpy(users[isAuth].inChannel, channelName, strlen(channelName));
-    success("Successful", "");
+    success("Successful", "-1");
 }
 
 void myJoinChannel(char *request)
@@ -297,7 +308,7 @@ void myJoinChannel(char *request)
     strncat(address, ".Channel.json", strlen(".Channel.json"));
 
 
-    // is user available
+    /// is user available
     if(!fileExists(address))
     {
         error("Channel name is not available.");
@@ -312,17 +323,16 @@ void myJoinChannel(char *request)
         tmp[i] = fgetc(file);
         if (feof(file))
             break;
-        //printf("%c", tmp[i]);
         i++;
     }
     fclose(file);
 
-    // processing
+    /// processing
     char content[100] = "";
     sprintf(content, "%s joined the channel.", users[isAuth].username);
     cJSON *monitor_json = cJSON_Parse(tmp);
     cJSON *messages = NULL;
-    messages = cJSON_GetObjectItemCaseSensitive(monitor_json, "messages");
+    messages = cJSON_GetObjectItem(monitor_json, "messages");
     cJSON *message = cJSON_CreateObject();
     cJSON_AddStringToObject(message, "sender", "server");
     cJSON_AddStringToObject(message, "content", content);
@@ -334,7 +344,7 @@ void myJoinChannel(char *request)
     fprintf(file, request);
     fclose(file);
     strncpy(users[isAuth].inChannel, channelName, strlen(channelName));
-    success("Successful", "");
+    success("Successful", "-1");
     cJSON_Delete(monitor_json);
 }
 
@@ -354,7 +364,7 @@ void mySendMessage(char *request)
     strncat(address, ".Channel.json", strlen(".Channel.json"));
 
 
-    // is user available
+    /// is user available
     if(!fileExists(address))
     {
         error("Channel name is not available.");
@@ -369,15 +379,14 @@ void mySendMessage(char *request)
         tmp[i] = fgetc(file);
         if (feof(file))
             break;
-        //printf("%c", tmp[i]);
         i++;
     }
     fclose(file);
 
-    // processing
+    /// processing
     cJSON *monitor_json = cJSON_Parse(tmp);
     cJSON *messages = NULL;
-    messages = cJSON_GetObjectItemCaseSensitive(monitor_json, "messages");
+    messages = cJSON_GetObjectItem(monitor_json, "messages");
     cJSON *message = cJSON_CreateObject();
     cJSON_AddStringToObject(message, "sender", users[isAuth].username);
     cJSON_AddStringToObject(message, "content", messageContent);
@@ -388,7 +397,7 @@ void mySendMessage(char *request)
     file = fopen(address, "w");
     fprintf(file, request);
     fclose(file);
-    success("Successful", "");
+    success("Successful", "-1");
     cJSON_Delete(monitor_json);
 }
 
@@ -405,7 +414,7 @@ void myRefresh(char *request)
     strncat(address, ".Channel.json", strlen(".Channel.json"));
 
 
-    // is user available
+    /// is user available
     if(!fileExists(address))
     {
         error("Channel name is not available.");
@@ -420,27 +429,29 @@ void myRefresh(char *request)
         tmp[i] = fgetc(file);
         if (feof(file))
             break;
-        //printf("%c", tmp[i]);
         i++;
     }
     fclose(file);
 
-    // processing
+    /// processing
     cJSON *monitor_json = cJSON_Parse(tmp);
     cJSON *monitor_pack = cJSON_CreateObject();
     cJSON *messages = NULL;
     cJSON *packs = NULL;
     cJSON_AddStringToObject(monitor_pack, "type", "List");
     packs = cJSON_AddArrayToObject(monitor_pack, "content");
-    messages = cJSON_GetObjectItemCaseSensitive(monitor_json, "messages");
+    messages = cJSON_GetObjectItem(monitor_json, "messages");
     int size = cJSON_GetArraySize(messages);
+    if(size == users[isAuth].messageCount) {
+        cJSON_AddStringToObject(monitor_pack, "content", "-1");
+    }
     for(int i = users[isAuth].messageCount; i < size; i++)
     {
         cJSON *message = cJSON_GetArrayItem(messages, i);
         cJSON *sender = NULL;
         cJSON *content = NULL;
-        sender = cJSON_GetObjectItemCaseSensitive(message, "sender");
-        content = cJSON_GetObjectItemCaseSensitive(message, "content");
+        sender = cJSON_GetObjectItem(message, "sender");
+        content = cJSON_GetObjectItem(message, "content");
 
         cJSON *pack = cJSON_CreateObject();
         cJSON_AddStringToObject(pack, "sender", sender->valuestring);
@@ -448,6 +459,7 @@ void myRefresh(char *request)
         cJSON_AddItemToArray(packs, pack);
     }
     response = cJSON_Print(monitor_pack);
+    printf("%s\n", response);
     users[isAuth].messageCount = size;
     cJSON_Delete(monitor_json);
     cJSON_Delete(monitor_pack);
@@ -465,14 +477,14 @@ void myChannelMembers(char *request)
     strncat(address, users[isAuth].inChannel, strlen(users[isAuth].inChannel));
     strncat(address, ".Channel.json", strlen(".Channel.json"));
 
-    // is user available
+    /// is user available
     if(!fileExists(address))
     {
         error("Channel name is not available.");
         return;
     }
 
-    // processing
+    /// processing
     cJSON *monitor_pack = cJSON_CreateObject();
     cJSON *packs = NULL;
     cJSON_AddStringToObject(monitor_pack, "type", "List");
@@ -502,7 +514,7 @@ void myLeaveChannel(char *request)
     strncat(address, ".Channel.json", strlen(".Channel.json"));
 
 
-    // is user available
+    /// is user available
     if(!fileExists(address))
     {
         error("Channel name is not available.");
@@ -517,17 +529,16 @@ void myLeaveChannel(char *request)
         tmp[i] = fgetc(file);
         if (feof(file))
             break;
-        //printf("%c", tmp[i]);
         i++;
     }
     fclose(file);
 
-    // processing
+    /// processing
     char content[100] = "";
     sprintf(content, "%s left the channel.", users[isAuth].username);
     cJSON *monitor_json = cJSON_Parse(tmp);
     cJSON *messages = NULL;
-    messages = cJSON_GetObjectItemCaseSensitive(monitor_json, "messages");
+    messages = cJSON_GetObjectItem(monitor_json, "messages");
     cJSON *message = cJSON_CreateObject();
     cJSON_AddStringToObject(message, "sender", "server");
     cJSON_AddStringToObject(message, "content", content);
@@ -541,10 +552,9 @@ void myLeaveChannel(char *request)
 
     memset(users[isAuth].inChannel, 0, strlen(users[isAuth].inChannel));
     users[isAuth].messageCount = 0;
-    success("Successful", "");
+    success("Successful", "-1");
     cJSON_Delete(monitor_json);
 }
-
 
 int fileExists(const char *filename)
 {

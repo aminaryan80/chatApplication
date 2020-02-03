@@ -31,13 +31,13 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="cJSON.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="cJSON.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="mycJSON.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mycJSON.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

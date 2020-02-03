@@ -54,23 +54,21 @@
 1576229369 c:\users\asus\desktop\project\client\cjson.h
 	<stddef.h>
 
-1580495933 source:c:\users\asus\desktop\project\client\main.c
-	<stdio.h>
+1580753272 source:c:\users\asus\desktop\project\client\main.c
 	<stdbool.h>
 	<string.h>
 	<winsock2.h>
 	<stdarg.h>
-	"cJSON.h"
+	"mycJSON.h"
 
-1580498908 source:c:\users\asus\desktop\project\client\mycjson.c
+1580733892 source:c:\users\asus\desktop\project\client\mycjson.c
 	<string.h>
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
 	<limits.h>
 	<ctype.h>
-	<locale.h>
 	"mycJSON.h"
 
-1580495922 c:\users\asus\desktop\project\client\mycjson.h
+1580733721 c:\users\asus\desktop\project\client\mycjson.h
 

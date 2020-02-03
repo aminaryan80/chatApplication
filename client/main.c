@@ -1,9 +1,8 @@
-#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <winsock2.h>
 #include <stdarg.h>
-#include "cJSON.h"
+#include "mycJSON.h"
 
 #define PORT 12345
 
@@ -21,17 +20,17 @@ void showChannelMembers();
 void leaveChannel();
 char** jsonParse(int, char*, ...);
 void myConnect(char*);
-void showMessage(char*, int);
+void showMessage(char*, int, int);
+void fixColor(int);
 
 char* response = NULL;
 char* token = "";
 char channelName[21] = "";
+int color = 6;
 
 int main()
 {
-    system("color 0C");
     printf("Welcome to the IRC Project\n");
-    system("color 07");
     printf("Developed by Mohammadamin Aryan\n");
     printf("For settings, type \"s\" in menu.\n\n");
     accountMenu();
@@ -78,19 +77,23 @@ void accountMenu()
         }
         else if(status == 's')
         {
-            showMessage("", 0);
+            showMessage("", 0, 0);
             setting();
         }
         else
         {
-            printf("\nSorry. Something went wrong. Please try again.\n\n");
+            system("cls");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Sorry. Something went wrong. Please try again.\n\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+            fixColor(color);
         }
     }
 }
 
 void myRegister()
 {
-    showMessage("Register:", 1);
+    showMessage("Register:", 1, 0);
     char id[2][256] = {};
     char buffer[1024] = "register ";
     char prints[2][20] = {"Enter your username", "Enter your password"};
@@ -105,7 +108,10 @@ void myRegister()
         if(strlen(id[status]) > 20)
         {
             memset(id[status], 0, sizeof(id[status]));
-            printf("Your Entered %s has more than 20 characters. Please try again\n", !status ? "username" : "password");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Your Entered %s has more than 20 characters. Please try again.\n", !status ? "username" : "password");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+            fixColor(color);
         }
         else
         {
@@ -122,17 +128,20 @@ void myRegister()
     char** responsePtr = jsonParse(2, response, "type", "content");
     if(strcmp(responsePtr[0], "Successful") != 0)
     {
-        showMessage("", 0);
+        showMessage("", 0, 0);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
         printf("%s Please try again.\n\n", responsePtr[1]);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        fixColor(color);
         return;
     }
-    showMessage("your account has been created successfully. you can now log in.", 2);
+    showMessage("your account has been created successfully. you can now log in.", 2, 1);
     return;
 }
 
 int myLogin()
 {
-    showMessage("Login:", 1);
+    showMessage("Login:", 1, 0);
     char id[2][256] = {};
     int sizeId[2] = {};
     char buffer[1024] = "login ";
@@ -146,13 +155,16 @@ int myLogin()
         if(strlen(id[status]) > 20)
         {
             memset(id[status], 0, sizeof(id[status]));
-            printf("Your Entered %s has more than 20 characters. Please try again\n", !status ? "username" : "password");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Your Entered %s has more than 20 characters. Please try again.\n", !status ? "username" : "password");
+            fixColor(color);
             continue;
         }
-        else
+        else {
+            if(!isEnteredAllowed(id[status]))
+                continue;
             status++;
-        if(!isEnteredAllowed(id[status]))
-            continue;
+        }
         printf("%s: (maximum 20 characters)\n", prints[status]);
         while(1)
         {
@@ -169,7 +181,10 @@ int myLogin()
             if(sizeId[status] >= 21)
             {
                 memset(id[status], 0, sizeof(id[status]));
-                printf("\n\nYour Entered %s has more than 20 characters. Please try again\n", !status ? "username" : "password");
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+                printf("\n\nYour Entered %s has more than 20 characters. Please try again.\n", !status ? "username" : "password");
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+                fixColor(color);
                 memset(id[status], 0, sizeof(id[status]));
                 sizeId[status] = 0;
                 continue;
@@ -201,11 +216,14 @@ int myLogin()
     if(strcmp(responsePtr[0], "AuthToken") != 0)
     {
         system("cls");
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
         printf("%s Please try again.\n\n", responsePtr[1]);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        fixColor(color);
         return 0;
     }
     token = responsePtr[1];
-    showMessage("You've successfully logged in.", 2);
+    showMessage("You've successfully logged in.", 2, 1);
     return 1;
 }
 
@@ -261,19 +279,23 @@ void mainMenu()
         }
         else if(status == 's')
         {
-            showMessage("", 0);
+            showMessage("", 0, 0);
             setting();
         }
         else
         {
-            printf("\nSorry. Something went wrong. Please try again.\n\n");
+            system("cls");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Sorry. Something went wrong. Please try again.\n\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+            fixColor(color);
         }
     }
 }
 
 int newChannel()
 {
-    showMessage("Create new channel:", 1);
+    showMessage("Create new channel:", 1, 0);
     char tmpName[21] = "";
     char buffer[1024] = "create channel ";
     while(1)
@@ -283,7 +305,10 @@ int newChannel()
         scanf("%[^\n]s", tmpName);
         if(strlen(tmpName) > 20)
         {
-            printf("Sorry. Your entered channel name has more than 20 characters. Please try again\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Sorry. Your entered channel name has more than 20 characters. Please try again.\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+            fixColor(color);
             continue;
         }
         else
@@ -301,20 +326,24 @@ int newChannel()
     char** responsePtr = jsonParse(2, response, "type", "content");
     if(strcmp(responsePtr[0], "Successful") != 0)
     {
+        system("cls");
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
         printf("%s Please try again.\n\n", responsePtr[1]);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        fixColor(color);
         return 0;
     }
     strncpy(channelName, tmpName, strlen(tmpName));
     char tmp[200] = "Channel \"";
     strncat(tmp, tmpName, strlen(tmpName));
     strcat(tmp, "\" successfully Created.");
-    showMessage(tmp, 2);
+    showMessage(tmp, 2, 1);
     return 1;
 }
 
 int joinChannel()
 {
-    showMessage("Join an existing channel:", 1);
+    showMessage("Join an existing channel:", 1, 0);
     char tmpName[21] = "";
     while(1)
     {
@@ -322,7 +351,10 @@ int joinChannel()
         scanf("%s", tmpName);
         if(strlen(tmpName) > 20)
         {
-            printf("Sorry. Your Entered channel name has more than 20 characters. Please try again\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Sorry. Your Entered channel name has more than 20 characters. Please try again.\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+            fixColor(color);
             continue;
         }
         else
@@ -341,14 +373,17 @@ int joinChannel()
     char** responsePtr = jsonParse(2, response, "type", "content");
     if(strcmp(responsePtr[0], "Successful") != 0)
     {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
         printf("%s Please try again.\n\n", responsePtr[1]);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        fixColor(color);
         return 0;
     }
     strncpy(channelName, tmpName, strlen(tmpName));
     char tmp[200] = "You joined channel \"";
     strcat(tmp, tmpName);
     strcat(tmp, "\" successfully.");
-    showMessage(tmp, 2);
+    showMessage(tmp, 2, 1);
     return 1;
 }
 
@@ -362,10 +397,13 @@ void myLogout()
     char** responsePtr = jsonParse(2, response, "type", "content");
     if(strcmp(responsePtr[0], "Successful") != 0)
     {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
         printf("%s Please try again.\n\n", responsePtr[1]);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        fixColor(color);
         return;
     }
-    showMessage("You've successfully logged out.", 2);
+    showMessage("You've successfully logged out.", 2, 1);
     return;
 }
 
@@ -391,34 +429,38 @@ void channelMenu()
         memset(tmp, 0, sizeof(tmp));
         if(status == '1')
         {
-            // Send Message
+            /// Send Message
             sendMessage();
         }
         else if(status == '2')
         {
-            // Refresh
+            /// Refresh
             refresh();
         }
         else if(status == '3')
         {
-            // Channel Members
+            /// Channel Members
             showChannelMembers();
         }
         else if(status == '4')
         {
-            // Leave Channel
+            /// Leave Channel
             leaveChannel();
             mainMenu();
             break;
         }
         else if(status == 's')
         {
-            showMessage("", 0);
+            showMessage("", 0, 0);
             setting();
         }
         else
         {
-            printf("\nSorry. Something went wrong. Please try again.\n\n");
+            system("cls");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Sorry. Something went wrong. Please try again.\n\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+            fixColor(color);
         }
     }
 }
@@ -428,7 +470,7 @@ void sendMessage()
     char tmp[39] = "New message to \"";
     strncat(tmp, channelName, strlen(channelName));
     strcat(tmp, "\":");
-    showMessage(tmp, 1);
+    showMessage(tmp, 1, 0);
     char message[71] = "";
     char buffer[
     ] = "send ";
@@ -445,12 +487,18 @@ void sendMessage()
         message[i - 1] = '\0';
         if(strlen(message) > 70)
         {
-            printf("Sorry. Your entered message has more than 70 characters. Please try again\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+            printf("Sorry. Your entered message has more than 70 characters. Please try again.\n");
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+            fixColor(color);
             memset(message, 0, 71);
             continue;
         }
-        else
+        else {
+            if(!isAllowedMessage(message))
+                continue;
             break;
+        }
     }
     strncat(buffer, message, strlen(message));
     strncat(buffer, ", ", strlen(", "));
@@ -460,10 +508,13 @@ void sendMessage()
     char** responsePtr = jsonParse(2, response, "type", "content");
     if(strcmp(responsePtr[0], "Successful") != 0)
     {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
         printf("%s Please try again.\n\n", responsePtr[1]);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        fixColor(color);
         return;
     }
-    showMessage("Your message successfully sent.", 2);
+    showMessage("Your message successfully sent.", 2, 1);
     return;
 }
 
@@ -472,28 +523,25 @@ void refresh()
     char tmp[39] = "Channel \"";
     strncat(tmp, channelName, strlen(channelName));
     strcat(tmp, "\"");
-    showMessage(tmp, 1);
+    showMessage(tmp, 1, 0);
     printf("Messages:\n");
     char buffer[1024] = "refresh ";
     strncat(buffer, token, strlen(token));
     strncat(buffer, "\n", strlen("\n"));
     myConnect(buffer);
     cJSON *json = cJSON_Parse(response);
-    cJSON *contentArray = cJSON_GetObjectItemCaseSensitive(json, "content");
-    cJSON *message = NULL;
+    cJSON *contentArray = cJSON_GetObjectItem(json, "content");
+
     int isNoMessage = 1;
-    cJSON_ArrayForEach(message, contentArray)
+    for(int i = 0; i < contentArray->arraySize; i++)
     {
-        cJSON *sender = cJSON_GetObjectItemCaseSensitive(message, "sender");
-        cJSON *content = cJSON_GetObjectItemCaseSensitive(message, "content");
-        if (!cJSON_IsString(sender) || !cJSON_IsString(content))
-        {
-            printf("Message receiving error\n");
-            return;
-        }
+        cJSON *message = contentArray->arrayObject[i];
+        cJSON *sender = cJSON_GetObjectItem(message, "sender");
+        cJSON *content = cJSON_GetObjectItem(message, "content");
         isNoMessage = 0;
         printf("\t%s : \"%s\"\n", sender->valuestring, content->valuestring);
     }
+
     if(isNoMessage)
         printf("\tno new messages\n");
     printf("\n");
@@ -505,19 +553,20 @@ void showChannelMembers()
     char tmp[39] = "\"";
     strncat(tmp, channelName, strlen(channelName));
     strcat(tmp, "\" members:");
-    showMessage(tmp, 1);
+    showMessage(tmp, 1, 0);
     char buffer[1024] = "channel members ";
     strncat(buffer, token, strlen(token));
     strncat(buffer, "\n", strlen("\n"));
     myConnect(buffer);
     cJSON *json = cJSON_Parse(response);
-    cJSON *contentArray = cJSON_GetObjectItemCaseSensitive(json, "content");
-    cJSON *name = contentArray->child;
-    while(cJSON_IsString(name))
+    cJSON *contentArray = cJSON_GetObjectItem(json, "content");
+
+    for(int i = 0; i < contentArray->arraySize; i++)
     {
+        cJSON *name = contentArray->arrayObject[i];
         printf("\t%s\n", name->valuestring);
-        name = name->next;
     }
+
     printf("\n");
     return;
 }
@@ -532,10 +581,13 @@ void leaveChannel()
     char** responsePtr = jsonParse(2, response, "type", "content");
     if(strcmp(responsePtr[0], "Successful") != 0)
     {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
         printf("%s Please try again.\n\n", responsePtr[1]);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+        fixColor(color);
         return;
     }
-    showMessage("You've successfully left the channel.", 2);
+    showMessage("You've successfully left the channel.", 2, 1);
     return;
 }
 
@@ -565,12 +617,12 @@ void setting()
         }
         else if(status == '2')
         {
-            showMessage("", 0);
+            showMessage("", 0, 0);
             break;
         }
         else
         {
-            showMessage("Sorry. Something went wrong. Please try again.", 2);
+            showMessage("Sorry. Something went wrong. Please try again.", 2, 2);
         }
     }
 }
@@ -593,42 +645,18 @@ void colorSetting()
         }
         status = tmp[0];
         memset(tmp, 0, sizeof(tmp));
-        if(status == '1')
+        if(status >= '1' && status <= '6')
         {
-            system("color 09");
-            break;
-        }
-        else if(status == '2')
-        {
-            system("color 0A");
-            break;
-        }
-        else if(status == '3')
-        {
-            system("color 0C");
-            break;
-        }
-        else if(status == '4')
-        {
-            system("color 0D");
-            break;
-        }
-        else if(status == '5')
-        {
-            system("color 0E");
-            break;
-        }
-        else if(status == '6')
-        {
-            system("color 07");
+            color = status - '0';
+            fixColor(color);
             break;
         }
         else
         {
-            showMessage("Sorry. Something went wrong. Please try again.", 2);
+            showMessage("Sorry. Something went wrong. Please try again.", 2, 2);
         }
     }
-    showMessage("", 0);
+    showMessage("", 0, 0);
 }
 
 int isEnteredAllowed(char* input)
@@ -641,7 +669,25 @@ int isEnteredAllowed(char* input)
     }
     if(isNotAllowed == 1)
     {
-        printf("Only characters and numbers allowed. Please try again\n");
+        printf("Only characters and numbers allowed. Please try again.\n");
+        return 0;
+    }
+    return 1;
+}
+
+int isAllowedMessage(char* input)
+{
+    int isNotAllowed = 0;
+    for(int i = 0; input[i]; i++)
+    {
+        if(input[i] == ' ')
+            continue;
+        if(isalnum(input[i]) == 0)
+            isNotAllowed = 1;
+    }
+    if(isNotAllowed == 1)
+    {
+        printf("Only characters and numbers allowed. Please try again.\n");
         return 0;
     }
     return 1;
@@ -653,11 +699,11 @@ char** jsonParse(int num, char* buffer, ...)
     va_list vaList;
     va_start(vaList, num);
     cJSON *json = cJSON_Parse(buffer);
+    cJSON **inputs = malloc(num * sizeof(*inputs));
     for(int i = 0; i < num; i++)
     {
         char* tmp = va_arg(vaList, char*);
-        *(inputs + i) = cJSON_GetObjectItemCaseSensitive(json, tmp);
-        //printf("%s : %s\n", tmp, (*(inputs + i))->valuestring);
+        *(inputs + i) = cJSON_GetObjectItem(json, tmp);
         *(result + i) = (*(inputs + i))->valuestring;
     }
     va_end(vaList);
@@ -694,29 +740,59 @@ void myConnect(char* buffer)
         exit(0);
     }
     send(client_socket, buffer, strlen(buffer), 0);
-    //memset(buffer, 0, 1024);
     free(response);
     response = malloc(5120);
     memset(response, 0, 5120);
     char buff[1025] = "";
     int i = 1;
-    /*while(recv(client_socket, buff, 1024, 0) != 0)
-    {
-        response = realloc(response, i * 1025);
-        strcat(response, buff);
-        memset(buff, 0, 1025);
-        i++;
-    }*/
     recv(client_socket, response, 5120, 0);
     closesocket(client_socket);
 }
 
-void showMessage(char* message, int num)
+void showMessage(char* message, int num, int s)
 {
     system("cls");
+    switch(s)
+    {
+    case 1:
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 32);
+        break;
+    case 2:
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 79);
+        break;
+    }
     printf("%s", message);
     for(int i = 0; i < num; i++)
     {
+        fixColor(color);
         printf("\n");
+    }
+}
+
+void fixColor(int status)
+{
+    if(status == 1)
+    {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 1);
+    }
+    else if(status == 2)
+    {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2);
+    }
+    else if(status == 3)
+    {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12);
+    }
+    else if(status == 4)
+    {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 5);
+    }
+    else if(status == 5)
+    {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
+    }
+    else if(status == 6)
+    {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
     }
 }

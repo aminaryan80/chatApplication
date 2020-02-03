@@ -22,10 +22,21 @@
 1576229369 c:\users\asus\desktop\project\server\cjson.h
 	<stddef.h>
 
-1578605036 source:c:\users\asus\desktop\project\server\main.c
+1580740737 source:c:\users\asus\desktop\project\server\main.c
 	<io.h>
 	<stdio.h>
 	<winsock2.h>
 	<string.h>
-	"cJSON.h"
+	"mycJSON.h"
+
+1580733908 c:\users\asus\desktop\project\server\mycjson.h
+
+1580733901 source:c:\users\asus\desktop\project\server\mycjson.c
+	<string.h>
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<limits.h>
+	<ctype.h>
+	"mycJSON.h"
 
