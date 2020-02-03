@@ -1,0 +1,97 @@
+# depslib dependency file v1.0
+1577628561 source:c:\c projects\client\main.c
+	<stdio.h>
+	<stdbool.h>
+	<string.h>
+	<winsock2.h>
+	<stdarg.h>
+	"cJSON.h"
+
+1576229369 c:\c projects\client\cjson.h
+	<stddef.h>
+
+1576229370 source:c:\c projects\client\cjson.c
+	<string.h>
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<limits.h>
+	<ctype.h>
+	<locale.h>
+	"cJSON.h"
+
+1576229370 source:c:\users\asus\desktop\client\cjson.c
+	<string.h>
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<limits.h>
+	<ctype.h>
+	<locale.h>
+	"cJSON.h"
+
+1576229369 c:\users\asus\desktop\client\cjson.h
+	<stddef.h>
+
+1577628561 source:c:\users\asus\desktop\client\main.c
+	<stdio.h>
+	<stdbool.h>
+	<string.h>
+	<winsock2.h>
+	<stdarg.h>
+	"cJSON.h"
+
+1576229370 source:c:\users\asus\desktop\project\client\cjson.c
+	<string.h>
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<limits.h>
+	<ctype.h>
+	<locale.h>
+	"cJSON.h"
+
+1576229369 c:\users\asus\desktop\project\client\cjson.h
+	<stddef.h>
+
+1580495933 source:c:\users\asus\desktop\project\client\main.c
+	<stdio.h>
+	<stdbool.h>
+	<string.h>
+	<winsock2.h>
+	<stdarg.h>
+	"cJSON.h"
+
+1580498908 source:c:\users\asus\desktop\project\client\mycjson.c
+	<string.h>
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<limits.h>
+	<ctype.h>
+	<locale.h>
+	"mycJSON.h"
+
+1580495922 c:\users\asus\desktop\project\client\mycjson.h
+
+1576229370 source:c:\users\asus\desktop\project\done\done ph1\client\cjson.c
+	<string.h>
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<limits.h>
+	<ctype.h>
+	<locale.h>
+	"cJSON.h"
+
+1576229369 c:\users\asus\desktop\project\done\done ph1\client\cjson.h
+	<stddef.h>
+
+1577628561 source:c:\users\asus\desktop\project\done\done ph1\client\main.c
+	<stdio.h>
+	<stdbool.h>
+	<string.h>
+	<winsock2.h>
+	<stdarg.h>
+	"cJSON.h"
+
